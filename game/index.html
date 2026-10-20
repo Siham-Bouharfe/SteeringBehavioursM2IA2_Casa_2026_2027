@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SteerWorld — Jeu Vidéo IA & Steering Behaviors</title>
+  
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- p5.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <!-- TensorFlow.js CDN (Exclusively utilized for Race Mode Neural Network) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div id="loading-title">STEER WORLD</div>
+    <div id="loading-bar-bg">
+      <div id="loading-bar-fill"></div>
+    </div>
+    <div id="loading-sub">INITIALISATION DU MOTEUR IA & RENDU GRAPHIQUE...</div>
+  </div>
+
+  <!-- Main Menu Overlay -->
+  <div id="menu-overlay">
+    <h1 id="menu-title">STEER WORLD</h1>
+    <p id="menu-subtitle">ALGORITHMES DE STEERING & NEUROÉVOLUTION IA</p>
+
+    <div id="menu-cards">
+      <!-- Mode 1: Ville -->
+      <div class="mode-card city" onclick="startCity()">
+        <span class="card-icon">🏙️</span>
+        <div class="card-title">VILLE</div>
+        <div class="card-sub">Chaos urbain · GTA style</div>
+      </div>
+
+      <!-- Mode 2: Évolution -->
+      <div class="mode-card evo" onclick="startEvo()">
+        <span class="card-icon">🧬</span>
+        <div class="card-title">ÉVOLUTION</div>
+        <div class="card-sub">Écosystème Darwinien</div>
+      </div>
+
+      <!-- Mode 3: Course -->
+      <div class="mode-card race" onclick="startRace()">
+        <span class="card-icon">🏎️</span>
+        <div class="card-title">COURSE</div>
+        <div class="card-sub">Réseaux de neurones IA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-Game HUD -->
+  <div id="ingame-hud">
+    <!-- Back to Menu button -->
+    <button id="btn-back">‹ MENU PRINCIPAL</button>
+
+    <!-- Topbar HUD -->
+    <div id="hud-topbar">
+      <span id="hud-mode-name">MODE</span>
+      <span id="hud-divider">|</span>
+      <span id="hud-stat">CHARGEMENT...</span>
+    </div>
+
+    <!-- City Mode Info & Controls (Bottom-Left) -->
+    <div id="city-info">
+      <div><strong>🎮 CONTRÔLES :</strong> <span>ZQSD</span> ou <span>Flèches</span></div>
+      <div><strong>⭐ OBJECTIF :</strong> Collecter les étoiles de score</div>
+      <div><strong>🏃 POURSUIVANTS :</strong> Fuyez ou attirez-les vers les obstacles</div>
+      <div><strong>👥 CITOYENS :</strong> Suivent le boulevard circulaire (Path Following)</div>
+      <div><strong>🐦 FOULE :</strong> Flocking de piétons (Boids Algos)</div>
+    </div>
+
+    <!-- Evo Mode Settings Panel (Top-Right) -->
+    <div id="evo-panel">
+      <h3>RÉGLAGES DU BIOME</h3>
+      <div class="slider-row">
+        <label><span>Taux Nourriture</span><output id="food-rate-val">0.22</output></label>
+        <input id="food-rate" type="range" min="0.05" max="0.80" step="0.02" value="0.22">
+      </div>
+      <div class="slider-row">
+        <label><span>Taux Poison</span><output id="poison-rate-val">0.04</output></label>
+        <input id="poison-rate" type="range" min="0.01" max="0.25" step="0.01" value="0.04">
+      </div>
+      <p style="color:var(--muted); font-size:0.75rem; margin-top:8px;">
+        💡 <strong>Clic gauche :</strong> Ajouter nourriture<br>
+        💡 <strong>Shift + Clic :</strong> Ajouter poison<br>
+        💡 <strong>Touche E :</strong> Afficher vision ADN
+      </p>
+    </div>
+
+    <!-- Evo Mode Stats Bars (Bottom-Left) -->
+    <div id="evo-stats">
+      <h3>STATISTIQUES ADN</h3>
+      <div class="stat-row">
+        <div class="stat-label"><span>Santé moyenne</span></div>
+        <div class="stat-bar-bg"><div id="stat-health" class="stat-bar-fill" style="width:100%; background:var(--green);"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label"><span>Attirance Nourriture</span></div>
+        <div class="stat-bar-bg"><div id="stat-food" class="stat-bar-fill" style="width:50%; background:var(--cyan);"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label"><span>Répulsion Poison</span></div>
+        <div class="stat-bar-bg"><div id="stat-poison" class="stat-bar-fill" style="width:50%; background:var(--magenta);"></div></div>
+      </div>
+    </div>
+
+    <!-- Race Mode Panel (Top-Right) -->
+    <div id="race-panel">
+      <h3>ACCÉLÉRATEUR IA</h3>
+      <div class="speed-buttons">
+        <button class="speed-btn active" data-speed="1">1X</button>
+        <button class="speed-btn" data-speed="2">2X</button>
+        <button class="speed-btn" data-speed="5">5X</button>
+        <button class="speed-btn" data-speed="10">10X</button>
+      </div>
+      <p style="color:var(--muted); font-size:0.75rem;">Progression Fitness par Génération :</p>
+      <canvas id="race-gen-graph"></canvas>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Game Scripts in dependency order -->
+  <script src="js/core/Vector2.js"></script>
+  <script src="js/steering/SteeringBehaviors.js"></script>
+  <script src="js/steering/Boids.js"></script>
+  <script src="js/steering/EvolutionaryAgent.js"></script>
+  <script src="js/steering/NeuralNetwork.js"></script>
+  <script src="js/steering/GeneticAlgorithm.js"></script>
+  <script src="js/modes/CityMode.js"></script>
+  <script src="js/modes/EvoMode.js"></script>
+  <script src="js/modes/RaceMode.js"></script>
+  <script src="js/ui/UIManager.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
+

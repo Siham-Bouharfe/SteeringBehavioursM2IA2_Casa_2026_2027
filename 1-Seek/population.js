@@ -4,41 +4,70 @@ const SeekPopulation = (() => {
   const MAX_COUNT = 200;
   const INITIAL_COUNT = 20;
   const ARRIVAL_RADIUS = 16;
-  const SPAWN_DISTANCE = ARRIVAL_RADIUS + 4;
-
   function distanceSquared(a, b) {
     return (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
   }
 
-  function hasArrived(vehicle, target) {
-    return distanceSquared(vehicle.pos, target) <= ARRIVAL_RADIUS ** 2;
+  function targetList(targets) {
+    return Array.isArray(targets) ? targets : [targets];
+  }
+
+  function targetPosition(target) {
+    return target.pos ?? target;
+  }
+
+  function targetRadius(target) {
+    return Number.isFinite(target.r) ? target.r : 0;
+  }
+
+  function hasArrived(vehicle, targets) {
+    return targetList(targets).some(target => {
+      const contactDistance = targetRadius(target) + vehicle.r;
+      return distanceSquared(vehicle.pos, targetPosition(target)) <= contactDistance ** 2;
+    });
+  }
+
+  function nearestTarget(vehicle, targets) {
+    return targetList(targets).reduce((nearest, candidate) =>
+      distanceSquared(vehicle.pos, targetPosition(candidate)) <
+        distanceSquared(vehicle.pos, targetPosition(nearest)) ? candidate : nearest);
+  }
+
+  function isOutsideTargetZones(point, targets, vehicleRadius) {
+    return targets.every(target => {
+      const minimumDistance = targetRadius(target) + vehicleRadius + 4;
+      return distanceSquared(point, targetPosition(target)) > minimumDistance ** 2;
+    });
   }
 
   // null signifie qu'aucune position ne respecte la zone d'exclusion.
-  function spawnPosition(target, w, h, radius, rng = Math.random) {
-    const marginX = w >= radius * 2 ? radius : 0;
-    const marginY = h >= radius * 2 ? radius : 0;
+  function spawnPosition(target, w, h, vehicleRadius, rng = Math.random) {
+    const marginX = w >= vehicleRadius * 2 ? vehicleRadius : 0;
+    const marginY = h >= vehicleRadius * 2 ? vehicleRadius : 0;
     const bounds = { left: marginX, right: w - marginX, top: marginY, bottom: h - marginY };
+    const targetEntries = targetList(target);
     for (let attempt = 0; attempt < 32; attempt++) {
       const point = {
         x: bounds.left + rng() * (bounds.right - bounds.left),
         y: bounds.top + rng() * (bounds.bottom - bounds.top),
       };
-      if (distanceSquared(point, target) > SPAWN_DISTANCE ** 2) return point;
+      if (isOutsideTargetZones(point, targetEntries, vehicleRadius)) return point;
     }
-    const corner = farthestCorner(target, bounds);
-    if (distanceSquared(corner, target) > SPAWN_DISTANCE ** 2) return corner;
-    const fallback = farthestCorner(target, { left: 0, right: w, top: 0, bottom: h });
-    return distanceSquared(fallback, target) > SPAWN_DISTANCE ** 2 ? fallback : null;
+    const corner = farthestCorner(targetEntries, bounds);
+    if (isOutsideTargetZones(corner, targetEntries, vehicleRadius)) return corner;
+    const fallback = farthestCorner(targetEntries, { left: 0, right: w, top: 0, bottom: h });
+    return isOutsideTargetZones(fallback, targetEntries, vehicleRadius) ? fallback : null;
   }
 
-  function farthestCorner(target, bounds) {
+  function farthestCorner(targets, bounds) {
+    const targetEntries = targetList(targets);
     const corners = [
       { x: bounds.left, y: bounds.top }, { x: bounds.right, y: bounds.top },
       { x: bounds.left, y: bounds.bottom }, { x: bounds.right, y: bounds.bottom },
     ];
-    return corners.reduce((best, point) =>
-      distanceSquared(point, target) > distanceSquared(best, target) ? point : best);
+    const clearance = point => Math.min(...targetEntries.map(target =>
+      distanceSquared(point, targetPosition(target))));
+    return corners.reduce((best, point) => clearance(point) > clearance(best) ? point : best);
   }
 
   function resize(vehicles, count, target, w, h, createVehicle, rng = Math.random) {
@@ -64,15 +93,24 @@ const SeekPopulation = (() => {
     return true;
   }
 
-  function step(vehicle, target, w, h, rng = Math.random) {
+  function ensureTargetCount(targets, count, createTarget) {
+    while (targets.length < count) targets.push(createTarget(targets.length));
+  }
+
+  function step(vehicle, target, w, h, rng = Math.random, onArrival = null) {
     if (hasArrived(vehicle, target)) {
+      if (onArrival?.(vehicle)) return;
       respawn(vehicle, target, w, h, rng);
       return;
     }
-    vehicle.applyBehaviors(target);
+    const objective = nearestTarget(vehicle, target);
+    vehicle.applyBehaviors(targetPosition(objective));
     vehicle.update();
     vehicle.edges();
-    if (hasArrived(vehicle, target)) respawn(vehicle, target, w, h, rng);
+    if (hasArrived(vehicle, target)) {
+      if (onArrival?.(vehicle)) return;
+      respawn(vehicle, target, w, h, rng);
+    }
   }
 
   function bindSlider(slider, output, vehicles, target, dimensions, createVehicle, rng = Math.random) {
@@ -86,5 +124,5 @@ const SeekPopulation = (() => {
   }
 
   return { MIN_COUNT, MAX_COUNT, INITIAL_COUNT, ARRIVAL_RADIUS,
-    hasArrived, spawnPosition, resize, respawn, step, bindSlider };
+    hasArrived, spawnPosition, resize, respawn, ensureTargetCount, step, bindSlider };
 })();

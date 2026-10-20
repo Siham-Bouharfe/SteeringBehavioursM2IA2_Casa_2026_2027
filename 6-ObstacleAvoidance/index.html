@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101b2b" />
+    <title>Le Jardin des Lucioles — chats & course neuronale</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="libraries/p5.min.js"></script>
+    <script src="animalSounds.js"></script>
+    <script src="audioFeedback.js"></script>
+    <script src="gameRules.js"></script>
+    <script src="vehicle.js"></script>
+    <script src="gardenBehaviors.js"></script>
+    <script src="gardenGenetics.js"></script>
+    <script src="gardenTree.js"></script>
+    <script src="gardenBed.js"></script>
+    <script src="gardenFood.js"></script>
+    <script src="shadowMoth.js"></script>
+    <script src="firefly.js"></script>
+    <script src="extractionZone.js"></script>
+    <script src="spark.js"></script>
+    <script src="heartParticle.js"></script>
+    <script src="cat.js"></script>
+    <script src="escortCat.js"></script>
+    <script src="missionBeacon.js"></script>
+    <script src="gardenMissions.js"></script>
+    <script src="catConversation.js"></script>
+    <script src="raceBrain.js"></script>
+    <script src="raceDynamics.js"></script>
+    <script src="raceTrainee.js"></script>
+    <script src="personalTraining.js"></script>
+    <script src="gardenClub.js"></script>
+    <script src="catModel.js"></script>
+    <script src="babylonCityRenderer.js"></script>
+    <script src="decoy.js"></script>
+    <script src="sketch.js"></script>
+  </head>
+  <body>
+    <header id="game-hud" class="game-hud" hidden>
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🐾</span>
+        <div>
+          <strong>Le Jardin des Lucioles</strong>
+          <span id="district-name">La clairière des songes</span>
+        </div>
+      </div>
+      <div class="companions" aria-live="polite">
+        <span class="paw-icon" aria-hidden="true">●</span>
+        <span id="companion-count">0 chat dans ta bande</span>
+      </div>
+      <div class="mission-chip" aria-live="polite">
+        <span>MISSION DE LA NUIT</span>
+        <strong id="mission-title">Mission · Les amis de la clairière</strong>
+        <small id="mission-progress">0 / 3 chats · refuge au sud</small>
+      </div>
+      <div class="race-progress food-status">
+        <span>Provisions</span>
+        <strong id="food-count">0 / 3 · 0 nourri</strong>
+      </div>
+      <div class="race-progress">
+        <span>Pièces</span>
+        <strong id="coin-count">0</strong>
+      </div>
+      <div class="race-progress difficulty">
+        <span>Championnat</span>
+        <strong id="difficulty-level">1 / 5</strong>
+      </div>
+      <label class="race-mode" for="race-difficulty-select">
+        <span>Niveau course</span>
+        <select id="race-difficulty-select" aria-label="Choisir la difficulté de la course">
+          <option value="easy">Détente</option>
+          <option value="normal" selected>Classique</option>
+          <option value="hard">Champion</option>
+        </select>
+      </label>
+      <div class="race-progress decoy-status">
+        <span>Leurre</span>
+        <strong id="decoy-count" class="decoy-badge ready">ESPACE</strong>
+      </div>
+      <button id="pause-button" class="quiet-button" type="button" aria-label="Mettre en pause">Ⅱ</button>
+    </header>
+
+    <!-- Combo Banner Popup -->
+    <div id="combo-banner">COMBO x2 ! +50 PIÈCES !</div>
+
+    <!-- Stamina / Sprint Bar -->
+    <div id="stamina-container" hidden>
+      <span id="stamina-label">SPRINT [MAJ / SHIFT]</span>
+      <div id="stamina-bar"></div>
+    </div>
+
+    <!-- Minimap Radar (Bottom-Right) -->
+    <div id="minimap-panel" hidden>
+      <div id="minimap-header">
+        <span>RADAR DU JARDIN</span>
+        <span id="minimap-zoom">GPS</span>
+      </div>
+      <canvas id="minimap-canvas" width="170" height="127"></canvas>
+    </div>
+
+    <!-- Arcade Race HUD Overlay -->
+    <div id="race-arcade-hud">
+      <div class="race-rank-card">
+        <span id="arcade-rank" class="race-rank-val">1</span>
+        <span class="race-rank-sub">CLASSEMENT<br>SUR 9</span>
+      </div>
+      <div class="race-speed-card">
+        <span id="arcade-speed" class="race-speed-val">42</span>
+        <span id="race-brain-status" class="race-speed-unit">RÉSEAU 8–20–2</span>
+      </div>
+      <div id="arcade-countdown" class="race-big-countdown" hidden>3</div>
+      <div id="arcade-wrong-way" class="race-wrong-way" hidden>⚠️ MAUVAIS SENS !</div>
+      <div class="race-driving-hint">Course autonome · <kbd>TAB</kbd> Changer de chat · <kbd>D</kbd> Voir ses capteurs</div>
+      <section id="race-debug-panel" class="race-debug-panel" aria-live="polite" hidden>
+        <strong>VISION DU RÉSEAU NEURONAL</strong>
+        <span id="race-debug-mode"></span>
+        <small>Entrées · capteurs 1–5, vitesse, cap et position latérale</small>
+        <code id="race-debug-inputs"></code>
+        <small>Sorties · direction et accélération</small>
+        <code id="race-debug-outputs"></code>
+      </section>
+    </div>
+
+    <details id="zouin-notebook" class="zouin-notebook" hidden>
+      <summary>Carnet de Zouin</summary>
+      <section>
+        <h2>Une aventure dans le jardin</h2>
+        <button type="button" data-garden-mission="lost">Retrouver un chat · 140 pièces</button>
+        <button type="button" data-garden-mission="escort">Escorter Pompon · 180 pièces</button>
+        <button type="button" data-garden-mission="escape">Échapper aux ombres · 160 pièces</button>
+        <button type="button" id="cancel-garden-mission" hidden>Abandonner cette mission</button>
+        <p id="garden-mission-note">Choisis une mission ; son objectif apparaîtra sur le radar.</p>
+      </section>
+      <section>
+        <h2>Le club des petits champions</h2>
+        <label for="training-cat">Choisir un chat</label>
+        <select id="training-cat"></select>
+        <button type="button" id="train-personal-brain">Entraîner son cerveau</button>
+        <button type="button" id="cancel-personal-training" hidden>Arrêter l’entraînement</button>
+        <p id="personal-training-status" role="status">Chaque chat s’entraîne avec ses propres variantes.</p>
+        <div id="personal-learning-record"></div>
+        <small>Le cerveau initial sait déjà prendre les virages. Les essais font évoluer ses propres poids.</small>
+      </section>
+    </details>
+
+    <div id="interaction-hint" class="interaction-hint" hidden></div>
+    <div id="game-toast" class="game-toast" role="status" aria-live="polite" hidden></div>
+    <div id="race-status" class="race-status" hidden></div>
+    <div class="controls-hint" aria-hidden="true" hidden>
+      <span><kbd>↑ ↓</kbd> Avancer / reculer · <kbd>← →</kbd> Tourner</span>
+      <span><kbd>SHIFT</kbd> Sprinter</span>
+      <span><kbd>ESPACE</kbd> Poser un Leurre</span>
+      <span><kbd>E</kbd> Miauler près d’un chat · Nourrir / Inviter</span>
+      <span><kbd>M</kbd> Miauler</span>
+      <span><kbd>D</kbd> Capteurs IA pendant la course</span>
+      <span><kbd>P</kbd> Pause</span>
+    </div>
+
+    <div id="screen-overlay" class="screen-overlay">
+      <section class="screen-card" role="dialog" aria-labelledby="overlay-title">
+        <div class="card-eyebrow">JARDIN NOCTURNE · LUCIOLES · CHATS</div>
+        <h1 id="overlay-title">Le Jardin des Lucioles</h1>
+        <p id="overlay-text">Explore un jardin miniature sous les étoiles. Les chats errants se promènent, évitent les massifs et suivent les lucioles avec leurs steering behaviors. Nourris-les, invite-les dans ta bande et rejoins la course neuronale de la clairière.</p>
+        <div class="menu-help">
+          <span><kbd>ZQSD</kbd> / <kbd>WASD</kbd> ou flèches : avancer, reculer et tourner</span>
+          <span><kbd>E</kbd> près d’un chat pour miauler, le nourrir ou l’inviter</span>
+          <span>Attire 3 chats vers le refuge lumineux pour terminer la mission</span>
+          <span>Les lucioles dérivent dans le jardin ; les chats les suivent, s’évitent et se regroupent</span>
+          <span>En course, chaque chat, y compris Zouin, est piloté uniquement par son cerveau</span>
+          <span>Ouvre le carnet de Zouin pour les missions, les tempéraments et l’entraînement individuel</span>
+          <span><kbd>TAB</kbd> change le chat suivi pendant la course</span>
+          <span>Pendant la course, appuie sur <kbd>D</kbd> pour afficher les cinq capteurs et les valeurs du réseau neuronal</span>
+          <span>Choisis Détente, Classique ou Champion et boucle le tour avant la fin du chrono</span>
+        </div>
+        <div id="race-results" class="race-results" hidden></div>
+        <button id="overlay-action" class="primary-button" type="button">Partir en balade <span aria-hidden="true">→</span></button>
+        <p class="card-note">Steering behaviors · neuroévolution · éclairage nocturne</p>
+      </section>
+    </div>
+
+    <script>
+      document.addEventListener('keydown', event => {
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(event.key)) {
+          event.preventDefault();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Chats sur circuit — Path Following</title>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+  </head>
+  <body>
+    <aside class="controls" aria-label="Réglages du circuit">
+      <div class="eyebrow">PATH FOLLOWING · 5.3</div>
+      <h1>Le circuit des chats</h1>
+      <p class="intro">Ajuste leur conduite, puis regarde la file trouver sa trajectoire.</p>
+      <label for="follow-weight"><span>Suivi du circuit</span><output id="follow-value">1.4</output></label>
+      <input id="follow-weight" type="range" min="0" max="4" step="0.1" value="1.4">
+      <label for="separation-weight"><span>Évitement des autres</span><output id="separation-value">1.2</output></label>
+      <input id="separation-weight" type="range" min="0" max="4" step="0.1" value="1.2">
+      <label for="path-width"><span>Largeur de la piste</span><output id="path-width-value">40 px</output></label>
+      <input id="path-width" type="range" min="20" max="80" step="2" value="40">
+      <label for="chat-length"><span>Longueur du chat</span><output id="chat-length-value">12 anneaux</output></label>
+      <input id="chat-length" type="range" min="1" max="24" step="1" value="12">
+      <label for="ring-spacing"><span>Écart entre les anneaux</span><output id="ring-spacing-value">26 px</output></label>
+      <input id="ring-spacing" type="range" min="10" max="60" step="1" value="26">
+      <div class="help"><kbd>T</kbd> ajouter un chat <span>·</span> <kbd>D</kbd> debug</div>
+      <div class="wander-note">Wander léger · réglable dans le code</div>
+    </aside>
+    <script src="libraries/p5.min.js"></script>
+    <script src="libraries/p5.sound.min.js"></script>
+    <script src="path.js"></script>
+    <script src="vehicle.js"></script>
+    <script src="anneauChat.js"></script>
+    <script src="chat.js"></script>
+    <script src="sketch.js"></script>
+  </body>
+</html>

@@ -1,0 +1,412 @@
+/* ============================================================
+   SteerWorld — style.css
+   Dark neon theme with glassmorphism panels
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0d1117;
+  --cyan:      #00f5ff;
+  --magenta:   #ff00aa;
+  --yellow:    #f1c56d;
+  --green:     #39ff14;
+  --glass-bg:  rgba(255,255,255,0.05);
+  --glass-bdr: rgba(255,255,255,0.10);
+  --text:      #e0e6f0;
+  --muted:     rgba(224,230,240,0.5);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* ── Canvas ───────────────────────────────────────────────── */
+canvas {
+  display: block;
+  position: fixed;
+  top: 0; left: 0;
+}
+
+/* ── HUD overlay layer ───────────────────────────────────── */
+#hud {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Glass panel utility ─────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 12px;
+  padding: 12px 18px;
+}
+
+/* ── Menu overlay ────────────────────────────────────────── */
+#menu-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background: rgba(13,17,23,0.55);
+  transition: opacity 0.4s;
+}
+
+#menu-overlay.hidden { opacity: 0; pointer-events: none; }
+
+#menu-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--cyan), var(--magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 24px var(--cyan));
+}
+
+#menu-subtitle {
+  font-size: 1.1rem;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: -20px;
+}
+
+/* ── Mode cards ──────────────────────────────────────────── */
+#menu-cards {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mode-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 20px;
+  padding: 32px 36px;
+  width: 220px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  pointer-events: all;
+  user-select: none;
+}
+
+.mode-card:hover {
+  transform: translateY(-8px) scale(1.04);
+  border-color: var(--card-color, var(--cyan));
+  box-shadow: 0 0 32px var(--card-color, var(--cyan)),
+              0 0 64px rgba(0,245,255,0.15);
+}
+
+.mode-card .card-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.mode-card .card-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mode-card .card-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 6px;
+  letter-spacing: 0.1em;
+}
+
+.mode-card.city  { --card-color: var(--cyan); }
+.mode-card.evo   { --card-color: var(--green); }
+.mode-card.race  { --card-color: var(--magenta); }
+
+.mode-card.city  .card-title { color: var(--cyan); }
+.mode-card.evo   .card-title { color: var(--green); }
+.mode-card.race  .card-title { color: var(--magenta); }
+
+/* ── In-game HUD (DOM layer) ─────────────────────────────── */
+#ingame-hud {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 15;
+  display: none;
+}
+
+#ingame-hud.visible { display: block; }
+
+/* top bar */
+#hud-topbar {
+  position: absolute;
+  top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 24px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 50px;
+  padding: 8px 24px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#hud-mode-name { color: var(--cyan); font-size: 1.1rem; }
+#hud-divider { color: var(--glass-bdr); }
+#hud-stat { color: var(--yellow); font-family: 'JetBrains Mono', monospace; }
+
+/* back button */
+#btn-back {
+  position: absolute;
+  top: 16px; left: 20px;
+  pointer-events: all;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: border-color 0.2s, color 0.2s;
+}
+#btn-back:hover { border-color: var(--magenta); color: var(--magenta); }
+
+/* ── Evo mode sliders panel ──────────────────────────────── */
+#evo-panel {
+  position: absolute;
+  right: 20px; top: 80px;
+  width: 220px;
+  pointer-events: all;
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 0.85rem;
+  display: none;
+}
+
+#evo-panel.visible { display: block; }
+
+#evo-panel h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.slider-row { margin-bottom: 12px; }
+.slider-row label {
+  display: flex; justify-content: space-between;
+  color: var(--muted); margin-bottom: 4px; font-size: 0.8rem;
+}
+.slider-row input[type=range] {
+  width: 100%;
+  accent-color: var(--green);
+}
+
+/* ── Race mode panel ─────────────────────────────────────── */
+#race-panel {
+  position: absolute;
+  right: 20px; top: 80px;
+  width: 220px;
+  pointer-events: all;
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 0.85rem;
+  display: none;
+}
+#race-panel.visible { display: block; }
+
+#race-panel h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--magenta);
+  margin-bottom: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.speed-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.speed-btn {
+  flex: 1;
+  background: rgba(255,0,170,0.1);
+  border: 1px solid rgba(255,0,170,0.3);
+  border-radius: 8px;
+  color: var(--magenta);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  padding: 4px 0;
+  cursor: pointer;
+  transition: background 0.15s;
+  pointer-events: all;
+}
+.speed-btn.active, .speed-btn:hover {
+  background: rgba(255,0,170,0.3);
+}
+
+#race-gen-graph {
+  width: 100%; height: 60px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+/* ── Evo stats bar graph ─────────────────────────────────── */
+#evo-stats {
+  position: absolute;
+  left: 20px; bottom: 80px;
+  width: 200px;
+  pointer-events: none;
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 0.8rem;
+  display: none;
+}
+#evo-stats.visible { display: block; }
+
+#evo-stats h3 {
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+.stat-row { margin-bottom: 8px; }
+.stat-label { color: var(--muted); margin-bottom: 3px; display: flex; justify-content: space-between; }
+.stat-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+.stat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+/* ── Toast ────────────────────────────────────────────────── */
+#toast-container {
+  position: fixed;
+  bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  animation: toastIn 0.3s ease, toastOut 0.4s ease 2.6s forwards;
+  white-space: nowrap;
+}
+
+@keyframes toastIn  { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+
+/* ── Loading screen ──────────────────────────────────────── */
+#loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--bg);
+  z-index: 200;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 20px;
+  transition: opacity 0.4s;
+}
+#loading-screen.fade-out { opacity: 0; pointer-events: none; }
+#loading-screen.gone { display: none; }
+
+#loading-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+#loading-bar-bg {
+  width: 300px; height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  border-radius: 2px;
+  animation: loadFill 1.2s ease forwards;
+}
+
+@keyframes loadFill { from { width: 0; } to { width: 100%; } }
+
+#loading-sub { color: var(--muted); font-size: 0.85rem; letter-spacing: 0.15em; }
+
+/* ── City HUD info ───────────────────────────────────────── */
+#city-info {
+  position: absolute;
+  bottom: 20px; left: 20px;
+  pointer-events: none;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-bdr);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.8;
+  display: none;
+}
+#city-info.visible { display: block; }
+#city-info span { color: var(--cyan); }
+
+/* Scrollbar hide */
+::-webkit-scrollbar { display: none; }

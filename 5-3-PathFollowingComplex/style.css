@@ -1,0 +1,14 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; overflow: hidden; font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #28323d; }
+canvas { position: fixed; inset: 0; display: block; z-index: 0; }
+.controls { position: fixed; z-index: 2; top: 24px; left: 24px; width: min(330px, calc(100vw - 48px)); max-height: calc(100vh - 48px); overflow-y: auto; padding: 22px 24px 19px; border: 1px solid rgba(255,255,255,.8); border-radius: 18px; background: rgba(255,253,249,.91); box-shadow: 0 16px 50px rgba(60,48,41,.13); backdrop-filter: blur(14px); }
+.eyebrow { color: #bd796e; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
+h1 { margin: 8px 0 5px; font-size: 22px; letter-spacing: -.04em; }
+.intro { margin: 0 0 20px; color: #727a7e; font-size: 12px; line-height: 1.5; }
+label { display: flex; justify-content: space-between; margin: 12px 0 5px; font-size: 12px; font-weight: 650; }
+output { color: #b56866; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; height: 5px; accent-color: #bf7772; cursor: pointer; }
+.help { margin-top: 16px; color: #58636a; font-size: 11px; }
+kbd { padding: 3px 6px; border: 1px solid #ddd4cb; border-radius: 5px; background: #fff; font: inherit; font-weight: 750; }
+.help span { padding: 0 4px; color: #b9a89b; }
+.wander-note { margin-top: 9px; color: #929391; font-size: 10px; }

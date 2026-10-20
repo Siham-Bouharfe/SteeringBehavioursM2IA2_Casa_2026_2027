@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Voitures génétiques — réglages</title>
+  </head>
+  <body>
+    <button id="settings-toggle" class="settings-toggle" type="button" aria-expanded="false" aria-controls="settings-panel">
+      ⚙ Réglages
+    </button>
+    <aside id="settings-panel" class="panel" aria-label="Réglages de la simulation" hidden>
+      <div class="panel-heading">
+        <div>
+          <div class="eyebrow">LABORATOIRE GÉNÉTIQUE</div>
+          <h1>Réglages de la course</h1>
+        </div>
+        <button id="settings-close" class="settings-close" type="button" aria-label="Fermer les réglages">×</button>
+      </div>
+      <p class="intro">Modifie les capteurs, les voitures et le circuit, puis relance une évolution.</p>
+
+      <label for="track-select"><span>Circuit</span><span class="track-tag">évolutions séparées</span></label>
+      <select id="track-select">
+        <option value="monaco">Monaco · virages serrés</option>
+        <option value="singapore">Singapour · urbain et sinueux</option>
+        <option value="abuDhabi">Abu Dhabi · longues courbes</option>
+        <option value="random">Circuit aléatoire</option>
+      </select>
+
+      <label for="sensor-range"><span>Portée des capteurs</span><output id="sensor-range-value">50 px</output></label>
+      <input id="sensor-range" type="range" min="20" max="200" step="5" value="50" />
+
+      <label for="sensor-count"><span>Nombre de capteurs</span><output id="sensor-count-value">7</output></label>
+      <input id="sensor-count" type="range" min="1" max="15" step="1" value="7" />
+
+      <label for="sensor-angle"><span>Angle du champ de vision</span><output id="sensor-angle-value">90°</output></label>
+      <input id="sensor-angle" type="range" min="30" max="180" step="5" value="90" />
+
+      <label for="max-speed"><span>Vitesse maximale</span><output id="max-speed-value">5</output></label>
+      <input id="max-speed" type="range" min="1" max="10" step="0.5" value="5" />
+
+      <label for="track-width"><span>Largeur du circuit</span><output id="track-width-value">60 px</output></label>
+      <input id="track-width" type="range" min="20" max="120" step="5" value="60" />
+
+      <label for="hidden-neurons"><span>Neurones cachés</span><output id="hidden-neurons-value">12</output></label>
+      <input id="hidden-neurons" type="range" min="2" max="32" step="1" value="12" />
+
+      <button id="apply-settings" type="button">Appliquer et recommencer</button>
+      <label class="speed-label" for="simulation-speed"><span>Vitesse de simulation</span><output id="simulation-speed-value">1×</output></label>
+      <input id="simulation-speed" type="range" min="1" max="10" step="1" value="1"
+        oninput="document.getElementById('simulation-speed-value').textContent = this.value + '×'" />
+      <p class="note">Les réglages prennent effet au clic ; la génération repart de zéro.</p>
+    </aside>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/addons/p5.dom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.1.0/dist/tf.min.js"></script>
+    <script src="settings.js"></script>
+    <script src="tracks.js"></script>
+    <script src="nn.js"></script>
+    <script src="ga.js"></script>
+    <script src="ray.js"></script>
+    <script src="boundary.js"></script>
+    <script src="vehicle.js"></script>
+    <script src="sketch.js"></script>
+  </body>
+</html>
