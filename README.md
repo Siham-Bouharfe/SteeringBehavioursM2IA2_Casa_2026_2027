@@ -154,3 +154,6 @@ node --test '6-ObstacleAvoidance/tests/*.test.cjs'
 ```
 ## Lien de la vidéo Youtube 
 https://www.youtube.com/watch?v=953PUwEWrJQ
+
+## Lien du Jeu MiaouVille sur itch.io
+https://sihambhrf.itch.io/miaouville-le-jardin-des-lucioles
